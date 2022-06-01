@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "990570668239",
+    "project_id": "planmed-732d7",
+    "storage_bucket": "planmed-732d7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:990570668239:android:900d317a395064ccba17ba",
+        "android_client_info": {
+          "package_name": "com.planmedicoquirurgico"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "990570668239-arb6pl5kutrsmer5i0mo6no9osom5fbf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6SR6cO4pK1DqdOkJephoDfD5aZ8UFcmc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "990570668239-arb6pl5kutrsmer5i0mo6no9osom5fbf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
