@@ -358,11 +358,11 @@ const DAY = (props) => {
     const D = zfill(toDay.getDate(), 2)
     const today = Y + "-" + M + "-" + D
     if (props.minDateNow === true) {
-      if (day >= today) {
+      if (day > today) {
         props.getDay(day)
       }
       else {
-        Toast.show(`minimum day ${D}`)
+        Toast.show(`Debes seleccionar una fecha posterior a la actual`)
       }
     }
     else {

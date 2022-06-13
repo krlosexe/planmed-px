@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState } from 'react';
-import { ActivityIndicator, SafeAreaView, StatusBar, View, Text, TouchableOpacity, ScrollView, StyleSheet, Modal, ImageBackground } from 'react-native';
+import { ActivityIndicator, SafeAreaView, StatusBar, View, Text, TouchableOpacity, ScrollView, StyleSheet, Modal, ImageBackground, Alert } from 'react-native';
 import Menu from '../components/Menu';
 import { Icon } from 'react-native-eva-icons';
 import Head from '../components/Head';
@@ -8,6 +8,25 @@ import { primaryColor, colorBack, colorLight } from '../Colors.js'
 import Calendary from '../components/Calendary'
 import { Api, base_url } from '../Env'
 import axios from 'axios'
+
+function zfill(number, width) {
+  var numberOutput = Math.abs(number);
+  var length = number.toString().length;
+  var zero = "0";
+  if (width <= length) {
+    if (number < 0) {
+      return ("-" + numberOutput.toString());
+    } else {
+      return numberOutput.toString();
+    }
+  } else {
+    if (number < 0) {
+      return ("-" + (zero.repeat(width - length)) + numberOutput.toString());
+    } else {
+      return ((zero.repeat(width - length)) + numberOutput.toString());
+    }
+  }
+}
 
 function NewCita(props) {
   const { navigation } = props
@@ -79,17 +98,43 @@ function NewCita(props) {
       setavailableButton(true)
     }
     if (date !== false) {
-      const horasdisponibles = async () => {
-        setloadHours(true)
-        console.log("???", base_url(Api, `get/availability/revision/${date}/${sede.id_clinic}`))
-        await axios.get(base_url(Api, `get/availability/revision/${date}/${sede.id_clinic}`)).then(function (response) {
-          setlisthours(response.data)
-        }).then(setgettinghour(true))
-          .catch(function (error) { console.log(error) })
-
-        setloadHours(false)
+      const dia = date.split("-")[2]
+      console.log("this is with split " + dia)
+      const toDay = new Date();
+      const finde = new Date(date).getDay();
+      if (finde == 5) {
+        console.log("sabado")
       }
-      horasdisponibles()
+      if (finde == 6) {
+        console.log("domingo")
+      }
+      console.log("este es el dia solicitado" + finde)
+      const Y = toDay.getFullYear()
+      const M = zfill(toDay.getMonth() + 1, 2)
+      const D = zfill(toDay.getDate(), 1)
+      const today = Y + "-" + M + "-" + D
+      console.log("this is today " + D)
+      //  [0,       1,        2,        3,      4,      5,      6]
+      //  [lunes, martes, miercoles, jueves, viernes, sabado, domingo]
+      //const numeroDia = new Date(toDay).getDay();             
+      //console.log("EL NUMERO DEL DIA ES:   " + numeroDia)
+      if (finde == 5 || finde == 6) {
+        Alert.alert("Lo sentimos", "No se puede realizar citas en fines de semana")
+      } else if (dia !== D) {
+        const horasdisponibles = async () => {
+          setloadHours(true)
+          console.log("???", base_url(Api, `get/availability/revision/${date}/${sede.id_clinic}`))
+          await axios.get(base_url(Api, `get/availability/revision/${date}/${sede.id_clinic}`)).then(function (response) {
+            setlisthours(response.data)
+          }).then(setgettinghour(true))
+            .catch(function (error) { console.log(error) })
+
+          setloadHours(false)
+        }
+        horasdisponibles()
+      }else{
+        Alert.alert("Lo sentimos", "Debe seleccionar una fecha posterior a la actual")
+      }
     }
   }, [itsSelectingHour, sede, date]);
 
@@ -231,12 +276,12 @@ function NewCita(props) {
   }
 
 
-  
 
 
-    // <StatusBar backgroundColor={primaryColor} barStyle="light-content" />
-      
-      
+
+  // <StatusBar backgroundColor={primaryColor} barStyle="light-content" />
+
+
 
 
   return (
@@ -251,83 +296,83 @@ function NewCita(props) {
           height: "100%"
         }}>
 
-      
-      <ScrollView style={{ backgroundColor: colorBack }}>
-        <Head name_user="Registro de citas" />
-        {
-          load &&
-          <ActivityIndicator style={{ marginTop: 20 }} size="large" color={primaryColor} />
-        }
-        {!load && quoteExists === true &&
-          <View style={style.wrap}>
-            <View style={{ alignItems: "center", backgroundColor: "#FFF", width: "80%", borderRadius: 20, padding: 20, alignSelf: "center", alignContent: "center" }}>
-              <Icon name={'alert-triangle-outline'} width={80} height={80} fill={'orange'} />
-              <Text style={{ marginTop: 10, fontSize: 16, fontWeight: "bold", color: primaryColor, textAlign: "center", }}>¡La solicitud de tu cita esta siendo procesada!</Text>
+
+        <ScrollView style={{ backgroundColor: colorBack }}>
+          <Head name_user="Registro de citas" />
+          {
+            load &&
+            <ActivityIndicator style={{ marginTop: 20 }} size="large" color={primaryColor} />
+          }
+          {!load && quoteExists === true &&
+            <View style={style.wrap}>
+              <View style={{ alignItems: "center", backgroundColor: "#FFF", width: "80%", borderRadius: 20, padding: 20, alignSelf: "center", alignContent: "center" }}>
+                <Icon name={'alert-triangle-outline'} width={80} height={80} fill={'orange'} />
+                <Text style={{ marginTop: 10, fontSize: 16, fontWeight: "bold", color: primaryColor, textAlign: "center", }}>¡La solicitud de tu cita esta siendo procesada!</Text>
+              </View>
             </View>
-          </View>
-        }
+          }
 
-        {!load && !quoteExists &&
-          <View style={style.wrap}>
-            {props.route.params.procedure === 0 && ProcessList !== [] &&
-              <View style={[style.group, { borderColor: primaryColor }]}>
-                <Text style={[style.text1, { color: primaryColor }]}>Seleccione el tipo de Tratamiento:</Text>
-                <TouchableOpacity onPress={() => SelectFather()}>
-                  <Text>{Father !== false ? Father.name : "Seleccionar el tipo de tratamiento"}</Text>
-                </TouchableOpacity>
-              </View>}
-
-            {Father !== false &&
-              <TouchableOpacity onPress={() => SelectProcedure()}>
+          {!load && !quoteExists &&
+            <View style={style.wrap}>
+              {props.route.params.procedure === 0 && ProcessList !== [] &&
                 <View style={[style.group, { borderColor: primaryColor }]}>
-                  <Text style={[style.text1, { color: primaryColor }]}>Seleccione el Tratamiento:</Text>
+                  <Text style={[style.text1, { color: primaryColor }]}>Seleccione el tipo de Tratamiento:</Text>
+                  <TouchableOpacity onPress={() => SelectFather()}>
+                    <Text>{Father !== false ? Father.name : "Seleccionar el tipo de tratamiento"}</Text>
+                  </TouchableOpacity>
+                </View>}
+
+              {Father !== false &&
+                <TouchableOpacity onPress={() => SelectProcedure()}>
+                  <View style={[style.group, { borderColor: primaryColor }]}>
+                    <Text style={[style.text1, { color: primaryColor }]}>Seleccione el Tratamiento:</Text>
+                    <Text>{procedure !== false ? procedure.name : "Seleccionar el tratamiento"}</Text>
+                  </View>
+                </TouchableOpacity>}
+
+              {props.route.params.procedure !== 0 &&
+                <View style={[style.group, { borderColor: primaryColor }]}>
+                  <Text style={[style.text1, { color: primaryColor }]}>Nombre de Tratamiento:</Text>
                   <Text>{procedure !== false ? procedure.name : "Seleccionar el tratamiento"}</Text>
-                </View>
-              </TouchableOpacity>}
+                </View>}
 
-            {props.route.params.procedure !== 0 &&
-              <View style={[style.group, { borderColor: primaryColor }]}>
-                <Text style={[style.text1, { color: primaryColor }]}>Nombre de Tratamiento:</Text>
-                <Text>{procedure !== false ? procedure.name : "Seleccionar el tratamiento"}</Text>
-              </View>}
+              {procedure != false &&
+                <View style={[style.group, { borderColor: primaryColor }]}>
+                  <Text style={[style.text1, { color: primaryColor }]}>Seleccione una de nuestras sedes:</Text>
+                  <TouchableOpacity onPress={() => SelectSede()}>
+                    <Text>{sede !== false ? sede.name : "Seleccionar la sede"}</Text>
+                  </TouchableOpacity>
+                </View>}
 
-            {procedure != false &&
-              <View style={[style.group, { borderColor: primaryColor }]}>
-                <Text style={[style.text1, { color: primaryColor }]}>Seleccione una de nuestras sedes:</Text>
-                <TouchableOpacity onPress={() => SelectSede()}>
-                  <Text>{sede !== false ? sede.name : "Seleccionar la sede"}</Text>
+              {sede !== false && itsSelectingHour === true &&
+                <View style={[style.group, { borderColor: primaryColor }]}>
+                  <Text style={[style.text1, { color: primaryColor }]}>Seleccione una fecha para su cita:</Text>
+                  <TouchableOpacity onPress={() => setgettingDate(true)}>
+                    <Text>{date !== false ? date : "Seleccionar fecha"} </Text>
+                  </TouchableOpacity>
+                </View>}
+
+
+              {date !== false && itsSelectingHour === true &&
+                <View style={[style.group, { borderColor: primaryColor }]}>
+                  <Text style={[style.text1, { color: primaryColor }]}>Seleccione una hora para su cita:</Text>
+                  <TouchableOpacity onPress={() => setgettinghour(true)}>
+                    <Text>{hour ? FormatHour(hour) : 'Seleccionar hora'}</Text>
+                  </TouchableOpacity>
+                </View>}
+
+
+              {availableButton &&
+                <TouchableOpacity onPress={() => AddNewCita()} style={[style.BtnPrimary, { backgroundColor: primaryColor }]}>
+                  <Icon name='checkmark-circle-2' width={20} height={20} fill={'#fff'} />
+                  <Text style={[style.loginText, style.textOn]}>Agendar Cita</Text>
                 </TouchableOpacity>
-              </View>}
+              }
+            </View>
+          }
+        </ScrollView>
 
-            {sede !== false && itsSelectingHour === true &&
-              <View style={[style.group, { borderColor: primaryColor }]}>
-                <Text style={[style.text1, { color: primaryColor }]}>Seleccione una fecha para su cita:</Text>
-                <TouchableOpacity onPress={() => setgettingDate(true)}>
-                  <Text>{date !== false ? date : "Seleccionar fecha"} </Text>
-                </TouchableOpacity>
-              </View>}
-
-
-            {date !== false && itsSelectingHour === true &&
-              <View style={[style.group, { borderColor: primaryColor }]}>
-                <Text style={[style.text1, { color: primaryColor }]}>Seleccione una hora para su cita:</Text>
-                <TouchableOpacity onPress={() => setgettinghour(true)}>
-                  <Text>{hour ? FormatHour(hour) : 'Seleccionar hora'}</Text>
-                </TouchableOpacity>
-              </View>}
-
-
-            {availableButton &&
-              <TouchableOpacity onPress={() => AddNewCita()} style={[style.BtnPrimary, { backgroundColor: primaryColor }]}>
-                <Icon name='checkmark-circle-2' width={20} height={20} fill={'#fff'} />
-                <Text style={[style.loginText, style.textOn]}>Agendar Cita</Text>
-              </TouchableOpacity>
-            }
-          </View>
-        }
-      </ScrollView>
-
-      <Menu props={{ ...props }} />
+        <Menu props={{ ...props }} />
       </ImageBackground>
       <Modal animationType="slide" transparent={true} visible={gettinghour}>
         <View style={style.wrapperModal}>
